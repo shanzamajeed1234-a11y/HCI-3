@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 2D Square</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #2c3e50;
+            font-family: sans-serif;
+        }
+        canvas {
+            background-color: #ecf0f1;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: grab;
+        }
+        canvas:active {
+            cursor: grabbing;
+        }
+        .instructions {
+            position: absolute;
+            top: 20px;
+            color: white;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="instructions">Click and Drag the Purple Square</div>
+    <canvas id="boxCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('boxCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 800;
+        canvas.height = 600;
+
+        // Square Properties
+        let box = {
+            x: 350,
+            y: 250,
+            size: 100,
+            color: 'purple',
+            isDragging: false
+        };
+
+        // Offset to keep mouse position relative to square corner
+        let offset = { x: 0, y: 0 };
+
+        function draw() {
+            // 1. Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw the square
+            ctx.fillStyle = box.color;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.fillRect(box.x, box.y, box.size, box.size);
+
+            requestAnimationFrame(draw);
+        }
+
+        // Mouse Events
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+
+            // Check if mouse is inside the square boundaries
+            if (mouseX >= box.x && mouseX <= box.x + box.size &&
+                mouseY >= box.y && mouseY <= box.y + box.size) {
+                
+                box.isDragging = true;
+                box.color = '#800080'; // Dark purple when clicked
+                
+                // Calculate where inside the square we clicked
+                offset.x = mouseX - box.x;
+                offset.y = mouseY - box.y;
+            }
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (box.isDragging) {
+                const rect = canvas.getBoundingClientRect();
+
+                // Update box position based on mouse - original click offset
+                box.x = (e.clientX - rect.left) - offset.x;
+                box.y = (e.clientY - rect.top) - offset.y;
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            box.isDragging = false;
+            box.color = 'purple'; // Reset color
+        });
+
+        // Start the animation loop
+        draw();
+    </script>
+</body>
+</html>
